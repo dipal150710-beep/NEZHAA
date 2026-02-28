@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulasi STS PAI Kelas 10</title>
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --bg-body: #f4f7f9;
+            --bg-card: #ffffff;
+            --text-main: #333333;
+            --text-muted: #666666;
+            --accent: #e3f2fd;
+            --success: #4caf50;
+            --error: #f44336;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            line-height: 1.6;
+            scroll-behavior: smooth;
+        }
+
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+
+        /* Header & Progress Bar */
+        .header-sticky {
+            position: sticky; top: 0; background: var(--bg-body);
+            padding: 10px 0; z-index: 100; border-bottom: 1px solid #ddd;
+        }
+
+        .progress-container {
+            width: 100%; height: 10px; background: #e0e0e0;
+            border-radius: 10px; overflow: hidden; margin-top: 5px;
+        }
+
+        #progress-bar {
+            width: 0%; height: 100%; background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        /* Home Page */
+        #home-page { text-align: center; padding: 50px 20px; }
+
+        .btn-large {
+            background-color: var(--primary); color: white; border: none;
+            padding: 18px 40px; font-size: 1.2rem; border-radius: 15px;
+            cursor: pointer; width: 100%; max-width: 300px; font-weight: bold;
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3); transition: 0.2s;
+        }
+
+        /* Cards & Questions */
+        .quiz-card {
+            background: var(--bg-card); border-radius: 20px; padding: 25px;
+            margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+        }
+
+        .q-number { font-weight: bold; color: var(--primary); margin-bottom: 10px; display: block; }
+        .q-text { font-size: 1.1rem; font-weight: 600; margin-bottom: 20px; }
+
+        .option-item { margin-bottom: 12px; }
+        .option-item label {
+            display: flex; align-items: center; background: var(--accent);
+            padding: 15px; border-radius: 12px; cursor: pointer;
+        }
+
+        .option-item input[type="radio"] { width: 20px; height: 20px; margin-right: 15px; }
+
+        textarea {
+            width: 100%; height: 120px; border-radius: 12px; border: 2px solid var(--accent);
+            padding: 15px; font-family: inherit; font-size: 1rem; resize: none;
+        }
+
+        /* Results & Feedback */
+        .result-box {
+            background: var(--primary); color: white; padding: 30px;
+            border-radius: 20px; text-align: center; margin-bottom: 30px;
+        }
+
+        .explanation {
+            margin-top: 15px; padding: 15px; background: #f9f9f9;
+            border-left: 5px solid var(--primary); font-size: 0.95rem; border-radius: 0 10px 10px 0;
+        }
+
+        .correct-style { border-left: 8px solid var(--success); }
+        .wrong-style { border-left: 8px solid var(--error); }
+        
+        .hidden { display: none; }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="home-page">
+        <h1 style="color: var(--primary);">🎯 Simulasi STS PAI</h1>
+        <p>Kelas 10 - Kurikulum Merdeka<br>Bab 6 & Bab 7</p>
+        <button class="btn-large" onclick="startQuiz()">Mulai Tes</button>
+    </div>
+
+    <div id="quiz-page" class="hidden">
+        <div class="header-sticky">
+            <div style="display: flex; justify-content: space-between;">
+                <span id="q-counter">Progres: 0/40</span>
+                <span id="timer-display" style="font-weight:bold; color:var(--primary);">00:00</span>
+            </div>
+            <div class="progress-container"><div id="progress-bar"></div></div>
+        </div>
+        <div id="questions-container" style="margin-top: 20px;"></div>
+        <button class="btn-large" style="margin: 30px auto; display: block;" onclick="validateAndSubmit()">Kirim Jawaban</button>
+    </div>
+
+    <div id="result-page" class="hidden fade-in">
+        <div class="result-box">
+            <h2>Skor Pilihan Ganda</h2>
+            <div style="font-size: 3.5rem; font-weight: bold;" id="score-display">0</div>
+            <p>Berhasil menjawab benar <span id="correct-count">0</span> dari 30 soal</p>
+        </div>
+        <h3>Pembahasan & Koreksi:</h3>
+        <div id="review-container"></div>
+        <button class="btn-large" style="background:#666; margin-top:20px;" onclick="location.reload()">Ulangi Tes</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        // 30 SOAL PILIHAN GANDA
+        { q: "Maksud dari 'mendekati zina' dalam QS. Al-Isra [17]: 32 adalah...", options: ["Melakukan pernikahan siri", "Melakukan perbuatan yang mengarah pada zina", "Berdiskusi hukum pergaulan", "Menikah tanpa restu"], answer: 1, explanation: "Segala hal yang memicu syahwat atau mengarah ke zina dilarang oleh ayat ini." },
+        { q: "Pelaku zina yang sudah pernah menikah secara sah disebut...", options: ["Ghairu Muhsan", "Syubhat", "Muhsan", "Majazi"], answer: 2, explanation: "Muhsan adalah status bagi pezina yang sudah pernah menikah secara sah." },
+        { q: "Hukuman pezina Ghairu Muhsan adalah...", options: ["Rajam sampai mati", "Cambuk 80 kali", "Cambuk 100 kali & diasingkan 1 tahun", "Penjara seumur hidup"], answer: 2, explanation: "Bagi yang belum menikah, hukumannya cambuk 100x dan pengasingan." },
+        { q: "Berdua-duaan dengan lawan jenis di tempat sepi disebut...", options: ["Ikhtilat", "Khalwat", "Qadf", "Muamalah"], answer: 1, explanation: "Khalwat adalah berduaan di tempat sunyi tanpa mahram." },
+        { q: "Dampak zina di dunia menurut Imam Sayuti adalah, kecuali...", options: ["Hilang wibawa", "Kemiskinan", "Pendek umur", "Mendapat murka Allah di akhirat"], answer: 3, explanation: "Murka Allah di akhirat adalah dampak ukhrawi." },
+        { q: "Sayyid Qutub menyebut zina merusak...", options: ["Teknologi", "Nasab (garis keturunan)", "Ekonomi mikro", "Kesenian"], answer: 1, explanation: "Zina menyebabkan rusaknya garis keturunan dan silsilah keluarga." },
+        { q: "Menuduh orang baik berzina tanpa 4 saksi disebut...", options: ["Bughat", "Fitnah", "Qadf", "Ghibah"], answer: 2, explanation: "Qadf adalah tuduhan zina tanpa bukti yang memenuhi syarat." },
+        { q: "Hukuman bagi pelaku Qadf adalah...", options: ["Cambuk 100 kali", "Cambuk 80 kali", "Rajam", "Denda"], answer: 1, explanation: "Hukuman Qadf adalah 80 kali cambuk." },
+        { q: "Campur baur laki-laki dan perempuan tanpa batas disebut...", options: ["Khalwat", "Ikhtilat", "Tabarruj", "Ukhuwah"], answer: 1, explanation: "Ikhtilat adalah percampuran lawan jenis secara bebas." },
+        { q: "Dampak psikologis pergaulan bebas adalah...", options: ["Percaya diri", "Gelisah & rasa bersalah", "Ketenangan", "Keren"], answer: 1, explanation: "Melanggar norma agama selalu menyisakan kegelisahan batin." },
+        { q: "Cara membentengi diri di era digital...", options: ["Jauhi teknologi", "Hapus semua medsos", "Jaga pandangan & selektif konten", "Ikuti tren"], answer: 2, explanation: "Menjaga mata dan hati di media sosial adalah langkah utama." },
+        { q: "Kaba'ir artinya...", options: ["Dosa kecil", "Dosa besar", "Mubah", "Makruh"], answer: 1, explanation: "Zina digolongkan sebagai dosa besar (Kaba'ir)." },
+        { q: "Penyakit menular akibat seks bebas...", options: ["Influenza", "Diabetes", "HIV/AIDS", "Asma"], answer: 2, explanation: "HIV/AIDS menyebar sangat cepat melalui perilaku seks bebas." },
+        { q: "Larangan zina secara sosiologis untuk menjaga...", options: ["Harta", "Keluarga & Nasab", "Kesehatan", "Pekerjaan"], answer: 1, explanation: "Agar nasab manusia tetap jelas dan keluarga tetap harmonis." },
+        { q: "Hubungan seksual dianggap zina jika...", options: ["Pasangan sah", "Tanpa ikatan pernikahan sah", "Tunangan", "Suami istri"], answer: 1, explanation: "Tanpa akad nikah yang sah, hubungan tersebut adalah zina." },
+        { q: "Menempatkan Allah di atas segalanya disebut...", options: ["Raja'", "Khauf", "Mahabbatullah", "Tawakkal"], answer: 2, explanation: "Mahabbatullah adalah mencintai Allah di atas apapun." },
+        { q: "Cara meningkatkan cinta Allah melalui alam...", options: ["Eksploitasi", "Tafakkur", "Abaikan", "Wisata saja"], answer: 1, explanation: "Meresapi keagungan Allah lewat ciptaan-Nya." },
+        { q: "Takut akan kemurkaan Allah disebut...", options: ["Raja'", "Khauf", "Tawakkal", "Syukur"], answer: 1, explanation: "Khauf mencegah kita dari berbuat dosa." },
+        { q: "Tanda sifat Khauf adalah...", options: ["Maksiat sendiri", "Menjauhi larangan walau tak dilihat orang", "Sombong", "Putus asa"], answer: 1, explanation: "Merasa diawasi oleh Allah setiap saat." },
+        { q: "Sikap optimis mengharap rahmat Allah disebut...", options: ["Tawakkal", "Raja'", "Tamanni", "Sabar"], answer: 1, explanation: "Raja' adalah harapan positif kepada Allah." },
+        { q: "Bedanya Raja' dengan Tamanni adalah...", options: ["Raja' harapan kosong", "Raja' dengan usaha, Tamanni tanpa usaha", "Sama saja", "Tamanni lebih baik"], answer: 1, explanation: "Berharap tanpa usaha (Tamanni) hanyalah khayalan." },
+        { q: "Khauf dan Raja' diibaratkan sebagai...", options: ["Mata", "Sayap burung", "Kaki", "Tangan"], answer: 1, explanation: "Harus seimbang agar iman tetap stabil." },
+        { q: "Berserah diri setelah usaha maksimal...", options: ["Sabar", "Tawakkal", "Qana'ah", "Ikhlas"], answer: 1, explanation: "Tawakkal adalah puncak dari sebuah ikhtiar." },
+        { q: "Manfaat utama Tawakkal...", options: ["Cepat kaya", "Ketenangan batin", "Tidak perlu kerja", "Pasti berhasil"], answer: 1, explanation: "Memberikan rasa tenang karena percaya pada ketetapan Allah." },
+        { q: "Urutan yang benar dalam Islam...", options: ["Tawakkal - Ikhtiar", "Ikhtiar - Tawakkal", "Hanya doa", "Hanya usaha"], answer: 1, explanation: "Berusaha dulu baru kemudian berserah diri." },
+        { q: "Tanda cinta Allah adalah mencintai...", options: ["Harta", "Al-Qur'an", "Pujian", "Hiburan"], answer: 1, explanation: "Mencintai firman Allah (Al-Qur'an) adalah bukti cinta pada-Nya." },
+        { q: "Jika Raja' berlebihan tanpa Khauf maka...", options: ["Putus asa", "Meremehkan dosa", "Sangat takut", "Sombong"], answer: 1, explanation: "Merasa 'pasti selamat' sehingga berani berdosa." },
+        { q: "Tawakkal yang salah adalah...", options: ["Disertai doa", "Pasrah tanpa usaha", "Bekerja keras", "Optimis"], answer: 1, explanation: "Pasrah tanpa usaha melanggar sunnatullah." },
+        { q: "Cinta tulus melahirkan ketaatan adalah hakikat...", options: ["Syukur", "Mahabbatullah", "Sabar", "Ikhlas"], answer: 1, explanation: "Cinta sejati selalu ingin menyenangkan yang dicintai (Allah)." },
+        { q: "Arti 'Fahisyah' dalam larangan zina adalah...", options: ["Biasa", "Keji", "Maaf", "Jalan lurus"], answer: 1, explanation: "Zina adalah perbuatan yang sangat kotor dan keji." },
+        
+        // 10 SOAL ESSAY
+        { q: "Jelaskan hikmah perbedaan hukuman zina Muhsan dan Ghairu Muhsan!", type: "essay", explanation: "Muhsan dihukum lebih berat karena ia sudah pernah merasakan nikmat nikah sah tapi masih melanggar, demi menjaga kehormatan pernikahan." },
+        { q: "Mengapa Islam melarang Khalwat? Jelaskan hubungannya dengan zina!", type: "essay", explanation: "Karena berduaan mengundang setan sebagai orang ketiga yang memicu terjadinya perbuatan zina." },
+        { q: "Sebutkan 3 dampak zina bagi masyarakat menurut Sayyid Qutub!", type: "essay", explanation: "1. Merusak nasab. 2. Kehancuran tanggung jawab keluarga. 3. Kerusakan moral sosial." },
+        { q: "Apa itu Qadf dan mengapa dosanya besar?", type: "essay", explanation: "Menuduh zina tanpa bukti. Berdosa besar karena membunuh karakter dan kehormatan orang lain." },
+        { q: "Berikan 3 langkah konkret menjaga diri di media sosial!", type: "essay", explanation: "1. Batasi interaksi lawan jenis. 2. Filter konten negatif. 3. Gunakan medsos untuk syiar." },
+        { q: "Apa risikonya jika seseorang hanya memiliki sifat Raja' tanpa Khauf?", type: "essay", explanation: "Ia akan menjadi lalai dan meremehkan maksiat karena terlalu percaya diri masuk surga." },
+        { q: "Berikan contoh perbedaan Raja' dan Tamanni dalam belajar!", type: "essay", explanation: "Raja': Belajar keras lalu berharap lulus. Tamanni: Berharap lulus tapi kerjanya hanya main game." },
+        { q: "Sebutkan tanda-tanda Mahabbatullah dalam diri seseorang!", type: "essay", explanation: "Rajin dzikir, lebih mencintai Allah dibanding hobi, dan patuh pada syariat." },
+        { q: "Jelaskan konsep Tawakkal yang benar menghadapi hasil ujian!", type: "essay", explanation: "Berusaha maksimal, lalu menerima apapun hasilnya dengan tenang sebagai keputusan terbaik Allah." },
+        { q: "Bagaimana Khauf dapat mencegah korupsi?", type: "essay", explanation: "Karena adanya rasa takut akan hisab dan siksa api neraka di akhirat meskipun tidak ketahuan manusia." }
+    ];
+
+    let seconds = 0;
+    let timer;
+
+    function startQuiz() {
+        document.getElementById('home-page').classList.add('hidden');
+        document.getElementById('quiz-page').classList.remove('hidden');
+        renderQuestions();
+        startTimer();
+    }
+
+    function renderQuestions() {
+        const container = document.getElementById('questions-container');
+        container.innerHTML = "";
+        questions.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = 'quiz-card';
+            card.id = `q-card-${index}`;
+
+            let html = `<span class="q-number">Soal ${index + 1}</span><div class="q-text">${item.q}</div>`;
+            if (item.type === 'essay') {
+                html += `<textarea id="ans-${index}" oninput="updateProgress()"></textarea>`;
+            } else {
+                html += `<div class="options-list">`;
+                item.options.forEach((opt, oIdx) => {
+                    html += `<div class="option-item"><label><input type="radio" name="q-${index}" value="${oIdx}" onchange="updateProgress()">${String.fromCharCode(65 + oIdx)}. ${opt}</label></div>`;
+                });
+                html += `</div>`;
+            }
+            card.innerHTML = html;
+            container.appendChild(card);
+        });
+    }
+
+    function updateProgress() {
+        let count = 0;
+        questions.forEach((q, i) => {
+            if (q.type === 'essay') {
+                if (document.getElementById(`ans-${i}`).value.trim() !== "") count++;
+            } else {
+                if (document.querySelector(`input[name="q-${i}"]:checked`)) count++;
+            }
+        });
+        const percent = (count / questions.length) * 100;
+        document.getElementById('progress-bar').style.width = percent + "%";
+        document.getElementById('q-counter').innerText = `Progres: ${count}/${questions.length}`;
+    }
+
+    function validateAndSubmit() {
+        let missed = [];
+        questions.forEach((q, i) => {
+            let done = q.type === 'essay' ? (document.getElementById(`ans-${i}`).value.trim() !== "") : document.querySelector(`input[name="q-${i}"]:checked`);
+            if (!done) missed.push(i);
+        });
+
+        if (missed.length > 0) {
+            alert(`Ada ${missed.length} soal belum diisi!`);
+            document.getElementById(`q-card-${missed[0]}`).scrollIntoView();
+            return;
+        }
+
+        if (confirm("Kirim jawaban sekarang?")) showResults();
+    }
+
+    function showResults() {
+        clearInterval(timer);
+        document.getElementById('quiz-page').classList.add('hidden');
+        document.getElementById('result-page').classList.remove('hidden');
+        window.scrollTo(0,0);
+
+        let correctCount = 0;
+        const mcqTotal = questions.filter(q => q.type !== 'essay').length;
+        const review = document.getElementById('review-container');
+        review.innerHTML = "";
+
+        questions.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = 'quiz-card';
+
+            if (item.type === 'essay') {
+                const userVal = document.getElementById(`ans-${index}`).value;
+                card.innerHTML = `<span class="q-number">Pembahasan ${index + 1} (Essay)</span><p>${item.q}</p><p><b>Jawaban Kamu:</b><br>${userVal}</p><div class="explanation"><b>Kunci Pembahasan:</b><br>${item.explanation}</div>`;
+            } else {
+                const selected = parseInt(document.querySelector(`input[name="q-${index}"]:checked`).value);
+                const isCorrect = selected === item.answer;
+                if (isCorrect) correctCount++;
+                card.classList.add(isCorrect ? 'correct-style' : 'wrong-style');
+                card.innerHTML = `<span class="q-number">Pembahasan ${index + 1} (${isCorrect ? 'BENAR ✅' : 'SALAH ❌'})</span><p>${item.q}</p><p>Kunci: ${String.fromCharCode(65 + item.answer)} | Kamu: ${String.fromCharCode(65 + selected)}</p><div class="explanation"><b>Pembahasan:</b><br>${item.explanation}</div>`;
+            }
+            review.appendChild(card);
+        });
+
+        document.getElementById('score-display').innerText = Math.round((correctCount / mcqTotal) * 100);
+        document.getElementById('correct-count').innerText = correctCount;
+    }
+
+    function startTimer() {
+        timer = setInterval(() => {
+            seconds++;
+            let m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            let s = (seconds % 60).toString().padStart(2, '0');
+            document.getElementById('timer-display').innerText = `${m}:${s}`;
+        }, 1000);
+    }
+</script>
+</body>
+</html>
